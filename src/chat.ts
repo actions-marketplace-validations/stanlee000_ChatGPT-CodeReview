@@ -1,21 +1,25 @@
-import { ChatGPTAPI } from 'chatgpt';
+import {OpenAIClient, AzureKeyCredential} from "@azure/openai";
+
 export class Chat {
-  private chatAPI: ChatGPTAPI;
+  private chatAPI: OpenAIClient;
 
   constructor(apikey: string) {
-    this.chatAPI = new ChatGPTAPI({
-      apiKey: apikey,
-      apiBaseUrl:
-        process.env.OPENAI_API_ENDPOINT || 'https://api.openai.com/v1',
-      completionParams: {
-        model: process.env.MODEL || 'gpt-3.5-turbo',
-        temperature: +(process.env.temperature || 0) || 1,
-        top_p: +(process.env.top_p || 0) || 1,
-        max_tokens: process.env.max_tokens
-          ? +process.env.max_tokens
-          : undefined,
-      },
-    });
+    // this.chatAPI = new ChatGPTAPI({
+    //   apiKey: apikey,
+    //   apiBaseUrl:
+    //     process.env.OPENAI_API_ENDPOINT || 'https://api.openai.com/v1',
+    //   completionParams: {
+    //     model: process.env.MODEL || 'gpt-3.5-turbo',
+    //     temperature: +(process.env.temperature || 0) || 1,
+    //     top_p: +(process.env.top_p || 0) || 1,
+    //     max_tokens: process.env.max_tokens
+    //       ? +process.env.max_tokens
+    //       : undefined,
+    //   },
+    // });
+    this.chatAPI = new OpenAIClient(
+        process.env.AZURE_API_ENDPOINT || 'https://openai-northus-region-credits.openai.azure.com/',
+        new AzureKeyCredential(apikey));
   }
 
   private generatePrompt = (patch: string) => {
@@ -40,9 +44,28 @@ export class Chat {
     console.time('code-review cost');
     const prompt = this.generatePrompt(patch);
 
-    const res = await this.chatAPI.sendMessage(prompt);
+    const { choices } = await this.chatAPI.getCompletions(
+        process.env.AZURE_OPENAI_DEPLOYMENT_NAME || 'gpt4-turbo',
+        [prompt],
+        {
+          maxTokens: process.env.max_tokens
+          ? +process.env.max_tokens
+          : undefined,
+          temperature: +(process.env.temperature || 0) || 1,
+          topP: +(process.env.top_p || 0) || 1,
+          n: 1,
+        }
+    );
 
-    console.timeEnd('code-review cost');
-    return res.text;
+    // const res = await this.chatAPI.sendMessage(prompt);
+
+    for (const choice of choices) {
+      return choice.text;
+    }
+
+    return '';
+
+    // console.timeEnd('code-review cost');
+    // return res.text;
   };
 }

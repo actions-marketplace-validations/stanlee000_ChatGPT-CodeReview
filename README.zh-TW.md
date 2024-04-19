@@ -17,7 +17,7 @@
 1. 轉到你要整合此機器人的倉庫首頁
 2. 點選 `settings`
 3. 點選 `actions` 在下面的 `secrets and variables`
-4. 切換到 `Variables` 選項，建立一個新變數 `OPENAI_API_KEY`，值為你的 open api key (如果是 Github Action 整合，則設定在 secrets 中)
+4. 切換到 `Variables` 選項，建立一個新變數 `AZURE_OPENAI_API_KEY`，值為你的 open api key (如果是 Github Action 整合，則設定在 secrets 中)
    <img width="1465" alt="image" src="https://user-images.githubusercontent.com/13167934/218533628-3974b70f-c423-44b0-b096-d1ec2ace85ea.png">
 
 ### 開始使用
@@ -35,7 +35,7 @@
 
 [actions/chatgpt-codereviewer](https://github.com/marketplace/actions/chatgpt-codereviewer)
 
-1. 新增 `OPENAI_API_KEY` 到你的 github actions secrets
+1. 新增 `AZURE_OPENAI_API_KEY` 到你的 github actions secrets
 2. 建立 `.github/workflows/cr.yml` 新增以下內容
 
 ```yml
@@ -57,7 +57,7 @@ jobs:
       - uses: anc95/ChatGPT-CodeReview@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
           # Optional
           LANGUAGE: Chinese
           OPENAI_API_ENDPOINT: https://api.openai.com/v1
