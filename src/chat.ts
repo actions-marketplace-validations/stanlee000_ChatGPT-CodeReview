@@ -44,9 +44,27 @@ export class Chat {
     console.time('code-review cost');
     const prompt = this.generatePrompt(patch);
 
-    const { choices } = await this.chatAPI.getCompletions(
+      const messages = [
+        { role: "system", content: process.env.AZURE_OPENAI_API_ASSISTANT_INSTRUCTION || "You are a helpful assistant and help to review the code" },
+        { role: "user", content: prompt }
+      ];
+
+    // const { choices } = await this.chatAPI.getCompletions(
+    //     process.env.AZURE_OPENAI_DEPLOYMENT_NAME || 'gpt4-turbo',
+    //     [prompt],
+    //     {
+    //       maxTokens: process.env.max_tokens
+    //       ? +process.env.max_tokens
+    //       : undefined,
+    //       temperature: +(process.env.temperature || 0) || 1,
+    //       topP: +(process.env.top_p || 0) || 1,
+    //       n: 1,
+    //     }
+    // );
+
+    const { choices } = await this.chatAPI.getChatCompletions(
         process.env.AZURE_OPENAI_DEPLOYMENT_NAME || 'gpt4-turbo',
-        [prompt],
+        messages,
         {
           maxTokens: process.env.max_tokens
           ? +process.env.max_tokens
@@ -59,9 +77,14 @@ export class Chat {
 
     // const res = await this.chatAPI.sendMessage(prompt);
 
+
     for (const choice of choices) {
-      return choice.text;
+      return choice.message?.content;
     }
+
+    // for (const choice of choices) {
+    //   return choice.text;
+    // }
 
     return '';
 
